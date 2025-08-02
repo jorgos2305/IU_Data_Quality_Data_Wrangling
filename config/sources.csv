@@ -1,0 +1,4 @@
+name;url;type;notes
+earthquake;https://earthquake.usgs.gov/fdsnws/event/1/;;
+weather;https://pro.openweathermap.org/data/2.5/weather;;
+air_quality;;;
