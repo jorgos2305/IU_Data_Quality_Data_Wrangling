@@ -1,4 +1,4 @@
 weather;https://pro.openweathermap.org/data/2.5/weather;API;JSON;requires api key
 geocoding;"http://api.openweathermap.org/geo/1.0/direct?";API;JSON;requires api key
-stocks;https://www.alphavantage.co/documentation;API;JSON;requires apikey
+stocks;https://www.alphavantage.co/query?;API;JSON;requires apikey
 earthquake;https://earthquake.usgs.gov/fdsnws/event/1;API;JSON;does not require api key
