@@ -112,7 +112,12 @@ class OpeanWeatherClient:
         return pd.DataFrame(weather)
 
 if __name__ == "__main__":
-    
+    # quick tests
+    from pathlib import Path
+
     client = OpeanWeatherClient()
     weather = client.fetch()
-    weather.to_csv("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/raw/weather_test.csv")
+    project_root = Path(__file__).resolve().parents[1]
+    output_path = project_root / "data" / "raw" / "weather_test.csv"
+    weather.to_csv(output_path, index=False)
+    
