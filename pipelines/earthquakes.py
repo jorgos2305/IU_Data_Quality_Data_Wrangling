@@ -2,31 +2,35 @@ import requests
 import pandas as pd
 import geopandas as gpd
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 from shapely.geometry import Point
 
 from utils.helpers import store, get_url
 
 class EarthQuakeClient:
 
-    def __init__(self, url:str):
-        self.url = url
-        # use to get the data from the last 24 hrs
-        now = datetime.now(timezone.utc)
-        yesterday = now - timedelta(days=1)
+    def __init__(self):
+        self.url = get_url("earthquake")
         self.params = {"method" : "query",
                        "format" : "geojson",
                        "limit" : 100, # Define a limit of 100 eathquakes a day
-                       "starttime": yesterday.isoformat(),
-                       "endtime" : now.isoformat(),
+                       "starttime": None,
+                       "endtime" : None,
                        "orderby" : "time"}
+        # Ensure that the requests ate performed witih the timezone for germany
+        self.berlin_time = ZoneInfo("Europe/Berlin")
 
     def fetch(self):
-        # get data from API
+        # Get the data from teh last 24 hrs. Use time in germany
+        today = datetime.now(self.berlin_time).replace(microsecond=0)
+        yesterday = today - timedelta(days=1)
+        self.params["starttime"] = yesterday.isoformat()
+        self.params["endtime"] = today.isoformat()
         response = requests.get(self.url, params=self.params)
         response.raise_for_status()
         raw_data = response.json()
         # store raw data in the data/raw directory
-        store(raw_data, "earthquake")
+        store(raw_data, "earthquakes")
         # GeoDataFrame include shapely.Point object for plotting on a map
         records = self._process(raw_data)
         return self._to_geodataframe(records)
@@ -65,12 +69,12 @@ class EarthQuakeClient:
         return gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     
 if __name__ == "__main__":
-    # some manual tests :)
-    import sys
+    # quick tests
     from pathlib import Path
 
-    sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-    url = get_url("earthquake")
-    earthquake = EarthQuakeClient(url).fetch()
+    client = EarthQuakeClient()
+    earthquakes = client.fetch()
+    project_root = Path(__file__).resolve().parents[1]
+    output_path = project_root / "data" / "raw" / "earthquakes" / "earthquake_test.csv"
+    earthquakes.to_csv(output_path, index=False)
     
