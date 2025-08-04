@@ -4,12 +4,18 @@ from pathlib import Path
 from datetime import datetime
 
 def get_url(api_name:str) -> str|None:
-    with Path(__file__).parent.parent.joinpath(r"config/sources.csv").open(newline="") as source:
-        reader = csv.DictReader(source, fieldnames=("name","url","type","notes"), delimiter=";")
+    with Path(__file__).parent.parent.joinpath(r"pipelines/sources.csv").open(newline="") as source:
+        reader = csv.DictReader(source, fieldnames=("name","url","access_method","data_type","notes"), delimiter=";")
         for row in reader:
             if row["name"] == api_name:
                 return row["url"]
     return None
+
+def load_openweather_cities() -> str:
+    with Path(__file__).parent.parent.joinpath(r"config/cities.csv").open(newline="") as source:
+        reader = csv.DictReader(source, fieldnames=("city","country"), delimiter=";")
+        cities = [row["city"] for row in reader]
+    return cities
 
 def store(raw_data:dict, api_name:str) -> None:
     # get the project's root directory
@@ -19,3 +25,6 @@ def store(raw_data:dict, api_name:str) -> None:
     file_name = raw_data_directory.joinpath(f"{current_time}_{api_name}.json")
     with file_name.open("w") as output:
         json.dump(raw_data, output, indent=4)
+
+load_openweather_cities()
+print(get_url("geocoding"))
