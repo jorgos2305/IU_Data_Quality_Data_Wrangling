@@ -84,7 +84,7 @@ class OpeanWeatherClient:
             lat = record["lat"]
             self.params_weather["lon"] = lon
             self.params_weather["lat"] = lat
-            self.params_weather["date"] = now
+            self.params_weather["date"] = now.isoformat()
             try:
                 response = requests.get(self.url_weather, params=self.params_weather)
                 response.raise_for_status()
@@ -118,6 +118,6 @@ if __name__ == "__main__":
     client = OpeanWeatherClient()
     weather = client.fetch()
     project_root = Path(__file__).resolve().parents[1]
-    output_path = project_root / "data" / "raw" / "weather_test.csv"
+    output_path = project_root / "data" / "raw" / "weather" / "weather_test.csv"
     weather.to_csv(output_path, index=False)
     
