@@ -8,8 +8,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from shapely.geometry import Point
 
-from utils.helpers import get_url
-from utils.helpers import load_openweather_cities
+from utils.helpers import get_url, load_openweather_cities, store
 
 load_dotenv("config/.env")
 
@@ -93,6 +92,7 @@ class OpeanWeatherClient:
                 pass
             else:
                 responses_weather.append(response.json())
+        store(responses_weather, "weather")
         return responses_weather
             
     def _process_weather_responses(self, weather_respones:list[dict]) -> pd.DataFrame:

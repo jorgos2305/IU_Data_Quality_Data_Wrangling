@@ -3,9 +3,7 @@ import os
 import pandas as pd
 from dotenv import load_dotenv
 
-from utils.helpers import get_url
-from utils.helpers import load_alpha_vantage_symbols
-from utils.helpers import store
+from utils.helpers import get_url, load_alpha_vantage_symbols, store
 
 load_dotenv("config/.env")
 
@@ -46,6 +44,7 @@ class AlphaVantageClient:
                 # Time Series (Daily) is not present for every symbol???
                 stocks = response.json()["Time Series (Daily)"]
                 response_stocks.append({symbol:stocks})
+        store(response_stocks)
         return response_stocks
     
     def _process(self, response_stocks:list[dict]) -> pd.DataFrame:
