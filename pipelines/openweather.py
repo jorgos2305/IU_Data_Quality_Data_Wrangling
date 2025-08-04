@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from shapely.geometry import Point
+from typing import List, Dict
 
 from utils.helpers import get_url, load_openweather_cities, store
 
@@ -47,7 +48,7 @@ class OpeanWeatherClient:
         df = df.drop(["name", "lon", "lat"], axis=1)
         return gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
     
-    def _fetch_city_geocoding(self) -> list[dict]:
+    def _fetch_city_geocoding(self) -> List[Dict]:
         response_cities = []
         for city in self.cities:
             self.params_geocoding["q"] = city
@@ -62,7 +63,7 @@ class OpeanWeatherClient:
                 time.sleep(1) # There is a request limit for the OpenWeather API
         return response_cities
     
-    def _process_city_responses(self, city_responses:list[dict]) -> gpd.GeoDataFrame:
+    def _process_city_responses(self, city_responses:List[Dict]) -> gpd.GeoDataFrame:
         city_coordinates = []
         for response_list in city_responses:
             for response in response_list:
@@ -75,7 +76,7 @@ class OpeanWeatherClient:
         df_geolocations["geometry"] = df_geolocations.apply(lambda row: Point(row["lon"], row["lat"]), axis=1)
         return gpd.GeoDataFrame(df_geolocations, geometry="geometry", crs="EPSG:4326")
     
-    def _fetch_weather(self, df_geolocations:gpd.GeoDataFrame) -> list[dict]:
+    def _fetch_weather(self, df_geolocations:gpd.GeoDataFrame) -> List[Dict]:
         now = datetime.now(self.berlin_time).replace(microsecond=0)
         responses_weather = []
         for _, record in df_geolocations.iterrows():
@@ -95,7 +96,7 @@ class OpeanWeatherClient:
         store(responses_weather, "weather")
         return responses_weather
             
-    def _process_weather_responses(self, weather_respones:list[dict]) -> pd.DataFrame:
+    def _process_weather_responses(self, weather_respones:List[Dict]) -> pd.DataFrame:
         weather = []
         for response in weather_respones:
             row = {"name" : response["name"], # city name - it might not match no automatic geocoding by the API

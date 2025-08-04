@@ -2,6 +2,7 @@ import requests
 import os
 import pandas as pd
 from dotenv import load_dotenv
+from typing import List, Dict
 
 from utils.helpers import get_url, load_alpha_vantage_symbols, store
 
@@ -29,7 +30,7 @@ class AlphaVantageClient:
         #return the DatFrame
         return self._process(response_stocks)
 
-    def _fetch_stocks(self) -> list[dict]:
+    def _fetch_stocks(self) -> List[Dict]:
         response_stocks = []
         for symbol in self.symbols:
             self.params["symbol"] = symbol
@@ -47,7 +48,7 @@ class AlphaVantageClient:
         store(response_stocks)
         return response_stocks
     
-    def _process(self, response_stocks:list[dict]) -> pd.DataFrame:
+    def _process(self, response_stocks:List[Dict]) -> pd.DataFrame:
         # Here, distinguish between two cases
         # 1. The first time storage occurs we get the 100 days/data points from the API
         # 2. From the 2nd API call on, we only want the last / most recent data point
@@ -65,7 +66,11 @@ class AlphaVantageClient:
         return pd.concat(dfs, axis=1)
 
 if __name__ == "__main__":
+    # quick tests
+    from pathlib import Path
 
     client = AlphaVantageClient()
     stocks = client.fetch()
-    stocks.to_csv("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/raw/stocks_test.csv")
+    project_root = Path(__file__).resolve().parents[1]
+    output_path = project_root / "data" / "raw" / "stocks" / "stocks_test.csv"
+    stocks.to_csv(output_path, index=False)

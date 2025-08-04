@@ -1,9 +1,10 @@
 import requests
 import pandas as pd
 import geopandas as gpd
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from shapely.geometry import Point
+from typing import List, Dict
 
 from utils.helpers import store, get_url
 
@@ -20,7 +21,7 @@ class EarthQuakeClient:
         # Ensure that the requests ate performed witih the timezone for germany
         self.berlin_time = ZoneInfo("Europe/Berlin")
 
-    def fetch(self):
+    def fetch(self) -> gpd.GeoDataFrame:
         # Get the data from teh last 24 hrs. Use time in germany
         today = datetime.now(self.berlin_time).replace(microsecond=0)
         yesterday = today - timedelta(days=1)
@@ -35,7 +36,7 @@ class EarthQuakeClient:
         records = self._process(raw_data)
         return self._to_geodataframe(records)
 
-    def _process(self, response:dict) -> dict[str:list]:
+    def _process(self, response:Dict) -> Dict[str:List]:
         # helps process the requested data before creating the data frame
         # The kekys match the keys return by the API for better processing
         records = {"time":[],
@@ -56,7 +57,7 @@ class EarthQuakeClient:
                     records[feature].append(earthquake["geometry"][feature])
         return records
         
-    def _to_geodataframe(self, records:dict):
+    def _to_geodataframe(self, records:Dict) -> gpd.GeoDataFrame:
         # converts data into geodataframe
         df = pd.DataFrame(records)
         # separte longitude and latitude from the depth
