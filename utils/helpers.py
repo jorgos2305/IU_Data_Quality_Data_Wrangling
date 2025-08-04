@@ -2,6 +2,7 @@ import csv
 import json
 from pathlib import Path
 from datetime import datetime
+from typing import List
 
 def get_url(api_name:str) -> str|None:
     with Path(__file__).parent.parent.joinpath(r"pipelines/sources.csv").open(newline="") as source:
@@ -11,7 +12,7 @@ def get_url(api_name:str) -> str|None:
                 return row["url"]
     return None
 
-def load_openweather_cities() -> str:
+def load_openweather_cities() -> List[str]:
     with Path(__file__).parent.parent.joinpath(r"config/cities.csv").open(newline="") as source:
         reader = csv.DictReader(source, fieldnames=("city","country"), delimiter=";")
         cities = [row["city"] for row in reader]
@@ -26,5 +27,8 @@ def store(raw_data:dict, api_name:str) -> None:
     with file_name.open("w") as output:
         json.dump(raw_data, output, indent=4)
 
-load_openweather_cities()
-print(get_url("geocoding"))
+def load_alpha_vantage_symbols() -> List[str]:
+    with Path(__file__).parent.parent.joinpath(r"config/cities.csv").open(newline="") as source:
+        reader = csv.DictReader(source, fieldnames=("name","symbol"), delimiter=";")
+        symbols = [row["symbol"] for row in reader]
+    return symbols
