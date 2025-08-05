@@ -28,7 +28,7 @@ def store(raw_data:dict, api_name:str) -> None:
         json.dump(raw_data, output, indent=4)
 
 def load_alpha_vantage_symbols() -> List[str]:
-    with Path(__file__).parent.parent.joinpath(r"config/cities.csv").open(newline="") as source:
+    with Path(__file__).parent.parent.joinpath(r"config/alphavantage_symbols.csv").open(newline="") as source:
         reader = csv.DictReader(source, fieldnames=("name","symbol"), delimiter=";")
         symbols = [row["symbol"] for row in reader]
     return symbols
