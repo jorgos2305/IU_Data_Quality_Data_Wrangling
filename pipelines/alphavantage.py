@@ -20,7 +20,7 @@ class AlphaVantageClient:
         self.params = {"function" : "TIME_SERIES_DAILY", # this endpoint provides a daily time series of the equity specified
                        "symbol" : None, # the equity -> replace this by all the companies that should be followed
                        "outputsize" : "compact",
-                       "dataype" : "json",
+                       "datatype" : "json",
                        "apikey" : self.apikey}
     
     def fetch(self) -> pd.DataFrame:
@@ -32,20 +32,24 @@ class AlphaVantageClient:
 
     def _fetch_stocks(self) -> List[Dict]:
         response_stocks = []
-        for symbol in self.symbols:
+        for symbol in self.symbols[:2]:
             self.params["symbol"] = symbol
             try:
                 response = requests.get(self.url, params=self.params)
                 response.raise_for_status()
+                stocks = response.json()["Time Series (Daily)"]
             except requests.HTTPError:
                 # log error
                 pass
-            else:
-                store(response.json())
-                # Time Series (Daily) is not present for every symbol???
-                stocks = response.json()["Time Series (Daily)"]
+            except KeyError as ke:
+                # log key error
+                # if Time Series (Daily) not in response
+                # The rate limit for the API has probably been reached
+                pass
+            else:                
                 response_stocks.append({symbol:stocks})
-        store(response_stocks)
+        # store raw data
+        store(response_stocks, "stocks")
         return response_stocks
     
     def _process(self, response_stocks:List[Dict]) -> pd.DataFrame:
@@ -54,16 +58,16 @@ class AlphaVantageClient:
         # 2. From the 2nd API call on, we only want the last / most recent data point
         # This cases are handles by the DataStoreClass, since it is part of the storage process
         dfs = [] # Store all dataframes for later concatenation
-        for response in response_stocks:
-            symbol = response["symbol"].keys()[0]
-            data = response["symbol"]
-            df = pd.DataFrame(data).T
-            df.index = pd.to_datetime(df.index, day_first=False)
-            df = df.apply(pd.to_numeric, erros="coerce")
-            df = df.rename(columns={"1. open" :"open", "2. high":"high", "3. low":"low", "4. close":"close", "5. volume": "volume"})
-            df["symbol"] = symbol
-            dfs.append(df)
-        return pd.concat(dfs, axis=1)
+        for response in response_stocks: # list
+            for symbol, data in response.items(): # of dictionaries
+                df = pd.DataFrame(data).T
+                df.index = pd.to_datetime(df.index)
+                df = df.apply(pd.to_numeric, errors="coerce")
+                df = df.rename(columns={"1. open" :"open", "2. high":"high", "3. low":"low", "4. close":"close", "5. volume": "volume"})
+                df["symbol"] = symbol
+                df["split_on"] = df["symbol"]
+                dfs.append(df)
+        return pd.concat(dfs, axis=0)
 
 if __name__ == "__main__":
     # quick tests

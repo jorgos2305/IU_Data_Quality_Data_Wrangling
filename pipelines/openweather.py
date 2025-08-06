@@ -71,7 +71,9 @@ class OpeanWeatherClient:
                        "lon" : response["lon"],
                        "lat" : response["lat"]}
                 city_coordinates.append(row)
-        return pd.DataFrame(city_coordinates) # latitude an longitude in EPSG:4326
+        df_geolocations = pd.DataFrame(city_coordinates) # latitude an longitude in EPSG:4326
+        df_geolocations = df_geolocations.replace(dict(zip(df_geolocations["city"].tolist(), self.cities)))
+        return df_geolocations
     
     def _fetch_weather(self, df_geolocations:pd.DataFrame) -> List[Dict]:
         now = datetime.now(self.berlin_time).replace(microsecond=0)

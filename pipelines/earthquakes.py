@@ -1,14 +1,28 @@
 import requests
 import pandas as pd
-import geopandas as gpd
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from shapely.geometry import Point
 from typing import List, Dict
 
 from utils.helpers import store, get_url
 
 class EarthQuakeClient:
+
+    MAGNITUDE_TYPE_DESCRIPTION = {"Mw": "Moment Magnitude",
+                                  "Ms": "Surface Wave Magnitude",
+                                  "mb": "Body Wave Magnitude",
+                                  "ml": "Local (Richter) Magnitude",
+                                  "mb_lg": "Lg-Wave Magnitude",
+                                  "md": "Duration Magnitude",
+                                  "MH": "Hand-calculated Magnitude",
+                                  "MI": "Intensity-derived Magnitude",
+                                  "Me": "Energy Magnitude",
+                                  "Mg": "Surface Wave from Ground Displacement",
+                                  "MWb": "Moment Magnitude from Body Waves",
+                                  "Mwr": "Regional Moment Magnitude",
+                                  "MwC": "Centroid Moment Magnitude",
+                                  "MwB": "Body-wave Derived Moment Magnitude",
+                                  "mww": "Moment Magnitude from W-phase"}
 
     def __init__(self):
         self.url = get_url("earthquake")
@@ -21,7 +35,7 @@ class EarthQuakeClient:
         # Ensure that the requests ate performed witih the timezone for germany
         self.berlin_time = ZoneInfo("Europe/Berlin")
 
-    def fetch(self) -> gpd.GeoDataFrame:
+    def fetch(self) -> pd.DataFrame:
         # Get the data from teh last 24 hrs. Use time in germany
         today = datetime.now(self.berlin_time).replace(microsecond=0)
         yesterday = today - timedelta(days=1)
@@ -36,7 +50,7 @@ class EarthQuakeClient:
         records = self._process(raw_data)
         return self._to_geodataframe(records)
 
-    def _process(self, response:Dict) -> Dict[str:List]:
+    def _process(self, response:Dict) -> Dict[str,List]:
         # helps process the requested data before creating the data frame
         # The kekys match the keys return by the API for better processing
         records = {"time":[],
@@ -57,17 +71,20 @@ class EarthQuakeClient:
                     records[feature].append(earthquake["geometry"][feature])
         return records
         
-    def _to_geodataframe(self, records:Dict) -> gpd.GeoDataFrame:
+    def _to_geodataframe(self, records:Dict) -> pd.DataFrame:
         # converts data into geodataframe
         df = pd.DataFrame(records)
         # separte longitude and latitude from the depth
-        df["geometry"] = df.coordinates.apply(lambda coord: Point(coord[:2]))
-        df["depth"] = df.coordinates.apply(lambda coord: coord[-1])
+        df["lon"] = df.coordinates.apply(lambda coord: coord[0])
+        df["lat"] = df.coordinates.apply(lambda coord: coord[1])
+        df["depth"] = df.coordinates.apply(lambda coord: coord[2])
         df = df.drop("coordinates", axis=1)
         # rename columns for better understanding
         df = df.rename(columns={"time":"timestamp", "mag":"magnitude", "magType":"scale"})
-        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms")
-        return gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
+        df = df.replace(EarthQuakeClient.MAGNITUDE_TYPE_DESCRIPTION)       
+        df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ms") # Timestamps in the responses are in ms
+        df["split_on"] = df["timestamp"].dt.strftime("date_%Y_%m_%d")
+        return df
     
 if __name__ == "__main__":
     # quick tests
