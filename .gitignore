@@ -3,3 +3,4 @@
 .env
 __pycache__
 notebooks/task2_experiments.ipynb
+notebooks/datastore_dev.h5
