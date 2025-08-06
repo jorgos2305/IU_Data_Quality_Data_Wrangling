@@ -1,6 +1,7 @@
 import requests
 import os
 import pandas as pd
+from pathlib import Path
 from dotenv import load_dotenv
 from typing import List, Dict
 
@@ -57,6 +58,10 @@ class AlphaVantageClient:
         # 1. The first time storage occurs we get the 100 days/data points from the API
         # 2. From the 2nd API call on, we only want the last / most recent data point
         # This cases are handles by the DataStoreClass, since it is part of the storage process
+        if Path("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/processed/datastore.h5").exists():
+            with pd.HDFStore("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/processed/datastore.h5", "r") as store:
+                keys = [key.split(r"/")[-1] for key in store.keys() if key.split(r"/")[1] == "stocks" and key.split(r"/")[2] == "data"]
+        
         dfs = [] # Store all dataframes for later concatenation
         for response in response_stocks: # list
             for symbol, data in response.items(): # of dictionaries
@@ -66,8 +71,14 @@ class AlphaVantageClient:
                 df = df.rename(columns={"1. open" :"open", "2. high":"high", "3. low":"low", "4. close":"close", "5. volume": "volume"})
                 df["symbol"] = symbol
                 df["split_on"] = df["symbol"]
-                dfs.append(df)
-        return pd.concat(dfs, axis=0)
+                if symbol in keys:
+                    most_recent_data_point = pd.DataFrame(df.iloc[0,:]).T
+                    dfs.append(most_recent_data_point)
+                else:
+                    dfs.append(df)
+        df_stocks = pd.concat(dfs, axis=0)
+        df_stocks[["open", "high", "low", "close", "volume"]] = df_stocks[["open", "high", "low", "close", "volume"]].astype("float64")
+        return df_stocks
 
 if __name__ == "__main__":
     # quick tests
