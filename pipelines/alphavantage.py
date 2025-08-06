@@ -33,7 +33,7 @@ class AlphaVantageClient:
 
     def _fetch_stocks(self) -> List[Dict]:
         response_stocks = []
-        for symbol in self.symbols[:2]:
+        for symbol in self.symbols:
             self.params["symbol"] = symbol
             try:
                 response = requests.get(self.url, params=self.params)
