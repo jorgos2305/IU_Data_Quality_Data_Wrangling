@@ -4,3 +4,5 @@
 __pycache__
 notebooks/task2_experiments.ipynb
 notebooks/datastore_dev.h5
+/airflow/dags/*
+!/airflow/dags/.gitkeep
