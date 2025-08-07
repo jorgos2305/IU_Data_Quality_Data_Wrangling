@@ -62,8 +62,10 @@ class AlphaVantageClient:
         # 1. The first time storage occurs we get the 100 days/data points from the API
         # 2. From the 2nd API call on, we only want the last / most recent data point
         # This cases are handles by the DataStoreClass, since it is part of the storage process
-        if Path("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/processed/datastore.h5").exists():
-            with pd.HDFStore("/Users/jorgetellez/Documents/06_Projects/IU_Data_Wrangling/data/processed/datastore.h5", "r") as store:
+        project_root = Path(__file__).resolve().parents[1]
+        datastore = project_root / "data" / "processed" / "datastore.h5"
+        if datastore.exists():
+            with pd.HDFStore(datastore, "r") as store:
                 keys = [key.split(r"/")[-1] for key in store.keys() if key.split(r"/")[1] == "stocks" and key.split(r"/")[2] == "data"]
         
         dfs = [] # Store all dataframes for later concatenation
