@@ -5,8 +5,9 @@ import time
 from dotenv import load_dotenv
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
+from pipelines.result import ClientResult
 from utils.helpers import get_url, load_openweather_cities, store
 
 load_dotenv("config/.env")
@@ -30,16 +31,24 @@ class OpeanWeatherClient:
         # Ensure that the requests are performed with the timezone for germany
         self.berlin_time = ZoneInfo("Europe/Berlin")
 
-    def fetch(self) -> pd.DataFrame:
+    def fetch(self) -> ClientResult:
+        errors = []
+        metadata_list = []
         # get the responses with cities data
-        city_responses = self._fetch_city_geocoding()
+        city_responses, metadata_geocoding, errors_geocoding = self._fetch_city_geocoding()
+        # record erros from the cities
+        errors.extend(errors_geocoding)
+        metadata_list.extend(metadata_geocoding)
         # process city responses
         df_geolocations = self._process_city_responses(city_responses)        
         # get weather responses for each city
-        weather_responses = self._fetch_weather(df_geolocations)
+        weather_responses, metadata_weather, errors_weather = self._fetch_weather(df_geolocations)
+        errors.extend(errors_weather)
+        metadata_list.extend(metadata_weather)
         # process weather responses
         df_weather = self._process_weather_responses(weather_responses)
-        return self._process(df_geolocations, df_weather)
+        df = self._process(df_geolocations, df_weather)
+        return ClientResult(data=df, metadata=metadata_list, errors=errors)
     
     def _process(self, df_geolocations:pd.DataFrame, df_weather:pd.DataFrame) -> pd.DataFrame:
         df = pd.concat([df_geolocations, df_weather], axis=1)
@@ -47,20 +56,22 @@ class OpeanWeatherClient:
         df["split_on"] = df["city"] # This column is used by the DataStore class to store the data according to the datamodel
         return df
     
-    def _fetch_city_geocoding(self) -> List[Dict]:
+    def _fetch_city_geocoding(self) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+        errors = []
+        metadata = []
         response_cities = []
         for city in self.cities:
             self.params_geocoding["q"] = city
             try:
                 response = requests.get(self.url_geocoding, params=self.params_geocoding)
                 response.raise_for_status()
-            except requests.HTTPError:
-                # log the error
-                pass
+            except requests.HTTPError as e:
+                errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":str(e), "current_symbol":city, "status":response.status_code})
             else:
                 response_cities.append(response.json())
                 time.sleep(1) # There is a request limit for the OpenWeather API
-        return response_cities
+        metadata.append({"fetched_at":datetime.now().isoformat(), "url":response.url, "status":response.status_code, "success_count":len(response_cities), "error_count":len(errors)})
+        return response_cities, metadata, errors
     
     def _process_city_responses(self, city_responses:List[Dict]) -> pd.DataFrame:
         city_coordinates = []
@@ -75,9 +86,11 @@ class OpeanWeatherClient:
         df_geolocations = df_geolocations.replace(dict(zip(df_geolocations["city"].tolist(), self.cities)))
         return df_geolocations
     
-    def _fetch_weather(self, df_geolocations:pd.DataFrame) -> List[Dict]:
-        now = datetime.now(self.berlin_time).replace(microsecond=0)
+    def _fetch_weather(self, df_geolocations:pd.DataFrame) -> Tuple[List[Dict], List[Dict], List[Dict]]:
+        errors = []
+        metadata = []
         responses_weather = []
+        now = datetime.now(self.berlin_time).replace(microsecond=0)
         for _, record in df_geolocations.iterrows():
             lon = record["lon"]
             lat = record["lat"]
@@ -87,14 +100,15 @@ class OpeanWeatherClient:
             try:
                 response = requests.get(self.url_weather, params=self.params_weather)
                 response.raise_for_status()
-            except requests.HTTPError:
+            except requests.HTTPError as e:
                 # log error
-                pass
+                errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":str(e), "current_symbol":record["city"], "status":response.status_code})
             else:
                 responses_weather.append(response.json())
         # Store raw data for the examples
+        metadata.append({"fetched_at":datetime.now().isoformat(), "url":response.url, "status":response.status_code, "success_count":len(responses_weather), "error_count":len(errors)})
         store(responses_weather, "weather")
-        return responses_weather
+        return responses_weather, metadata, errors
             
     def _process_weather_responses(self, weather_respones:List[Dict]) -> pd.DataFrame:
         weather = []

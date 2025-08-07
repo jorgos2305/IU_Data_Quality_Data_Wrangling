@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from typing import List, Dict
 
+from pipelines.result import ClientResult
 from utils.helpers import store, get_url
 
 class EarthQuakeClient:
@@ -24,7 +25,7 @@ class EarthQuakeClient:
                                   "MwB": "Body-wave Derived Moment Magnitude",
                                   "mww": "Moment Magnitude from W-phase"}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.url = get_url("earthquake")
         self.params = {"method" : "query",
                        "format" : "geojson",
@@ -35,20 +36,26 @@ class EarthQuakeClient:
         # Ensure that the requests ate performed witih the timezone for germany
         self.berlin_time = ZoneInfo("Europe/Berlin")
 
-    def fetch(self) -> pd.DataFrame:
+    def fetch(self) -> ClientResult:
         # Get the data from teh last 24 hrs. Use time in germany
         today = datetime.now(self.berlin_time).replace(microsecond=0)
         yesterday = today - timedelta(days=1)
         self.params["starttime"] = yesterday.isoformat()
         self.params["endtime"] = today.isoformat()
-        response = requests.get(self.url, params=self.params)
-        response.raise_for_status()
-        raw_data = response.json()
-        # store raw data in the data/raw directory
-        store(raw_data, "earthquakes")
-        # GeoDataFrame include shapely.Point object for plotting on a map
+        errors = []
+        metadata = []
+        try:
+            response = requests.get(self.url, params=self.params)
+            response.raise_for_status()
+            raw_data = response.json()
+            # store raw data in the data/raw directory
+            store(raw_data, "earthquakes")
+        except requests.HTTPError as e:
+            errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":str(e), "current_symbol":"", "status":response.status_code})
+        metadata.append({"fetched_at":datetime.now().isoformat(), "url":response.url, "status":response.status_code, "success_count":len(raw_data["features"]), "error_count":len(errors)})
         records = self._process(raw_data)
-        return self._to_geodataframe(records)
+        df = self._to_dataframe(records)
+        return ClientResult(data=df, metadata=metadata, errors=errors)
 
     def _process(self, response:Dict) -> Dict[str,List]:
         # helps process the requested data before creating the data frame
@@ -71,7 +78,7 @@ class EarthQuakeClient:
                     records[feature].append(earthquake["geometry"][feature])
         return records
         
-    def _to_geodataframe(self, records:Dict) -> pd.DataFrame:
+    def _to_dataframe(self, records:Dict) -> pd.DataFrame:
         # converts data into geodataframe
         df = pd.DataFrame(records)
         # separte longitude and latitude from the depth

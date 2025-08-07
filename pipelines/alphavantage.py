@@ -4,7 +4,9 @@ import pandas as pd
 from pathlib import Path
 from dotenv import load_dotenv
 from typing import List, Dict
+from datetime import datetime
 
+from pipelines.result import ClientResult
 from utils.helpers import get_url, load_alpha_vantage_symbols, store
 
 load_dotenv("config/.env")
@@ -24,34 +26,36 @@ class AlphaVantageClient:
                        "datatype" : "json",
                        "apikey" : self.apikey}
     
-    def fetch(self) -> pd.DataFrame:
+    def fetch(self) -> ClientResult:
         # get the stock data
-        response_stocks = self._fetch_stocks()
-        # process the resonse
-        #return the DatFrame
-        return self._process(response_stocks)
+        response_stocks, metadata, errors = self._fetch_stocks()
+        df = self._process(response_stocks)
+        return ClientResult(data=df, metadata=metadata, errors=errors)
 
     def _fetch_stocks(self) -> List[Dict]:
         response_stocks = []
+        metadata = []
+        errors = []
         for symbol in self.symbols:
             self.params["symbol"] = symbol
             try:
                 response = requests.get(self.url, params=self.params)
                 response.raise_for_status()
                 stocks = response.json()["Time Series (Daily)"]
-            except requests.HTTPError:
+            except requests.HTTPError as e:
                 # log error
-                pass
+                errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":str(e), "current_symbol":symbol, "status":response.status_code})
             except KeyError as ke:
                 # log key error
                 # if Time Series (Daily) not in response
                 # The rate limit for the API has probably been reached
-                pass
-            else:                
+                errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":"Missing key: Time Series (Daily)-ratelimit reached", "current_symbol":symbol, "status":response.status_code})
+            else:
                 response_stocks.append({symbol:stocks})
+        metadata.append({"fetched_at":datetime.now().isoformat(), "url":response.url, "status":response.status_code, "success_count":len(response_stocks), "error_count":len(errors)})
         # store raw data
         store(response_stocks, "stocks")
-        return response_stocks
+        return response_stocks, metadata, errors
     
     def _process(self, response_stocks:List[Dict]) -> pd.DataFrame:
         # Here, distinguish between two cases
