@@ -44,17 +44,28 @@ class EarthQuakeClient:
         self.params["endtime"] = today.isoformat()
         errors = []
         metadata = []
+        response = None
         try:
             response = requests.get(self.url, params=self.params)
             response.raise_for_status()
+        except requests.HTTPError as e:
+            errors.append({"timestamp":datetime.now().isoformat(),
+                           "url":response.url if response else self.url,
+                           "error":str(e),
+                           "current_symbol":"",
+                           "status":response.status_code if response else None})
+            df = pd.DataFrame(columns=["timestamp", "magnitude", "scale", "alert", "tsunami", "place", "coordinates"])
+        else:
             raw_data = response.json()
+            records = self._process(raw_data)
             # store raw data in the data/raw directory
             store(raw_data, "earthquakes")
-        except requests.HTTPError as e:
-            errors.append({"timestamp":datetime.now().isoformat(), "url":response.url, "error":str(e), "current_symbol":"", "status":response.status_code})
-        metadata.append({"fetched_at":datetime.now().isoformat(), "url":response.url, "status":response.status_code, "success_count":len(raw_data["features"]), "error_count":len(errors)})
-        records = self._process(raw_data)
-        df = self._to_dataframe(records)
+            df = self._to_dataframe(records)
+            metadata.append({"fetched_at":datetime.now().isoformat(),
+                             "url":response.url if response else self.url,
+                             "status":response.status_code if response else None,
+                             "success_count":len(raw_data["features"]),
+                             "error_count":len(errors)})
         return ClientResult(data=df, metadata=metadata, errors=errors)
 
     def _process(self, response:Dict) -> Dict[str,List]:
@@ -101,5 +112,6 @@ if __name__ == "__main__":
     earthquakes = client.fetch()
     project_root = Path(__file__).resolve().parents[1]
     output_path = project_root / "data" / "raw" / "earthquakes" / "earthquake_test.csv"
-    earthquakes.to_csv(output_path, index=False)
+    if earthquakes.data is not None:
+        earthquakes.data.to_csv(output_path, index=False)
     
