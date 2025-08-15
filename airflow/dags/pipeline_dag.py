@@ -25,7 +25,7 @@ start_date = pendulum.datetime(year=2025, month=8, day=8, hour=0, minute=0, seco
 
 dag_weather = DAG(
     dag_id="open_weather_pipeline",
-    default_args={**default_args, "start_date": start_date},
+    default_args={**default_args, "start_date": start_date.add(hours=12)},
     schedule=timedelta(hours=2),
     catchup=False,
     tags=["weather"]
@@ -43,8 +43,8 @@ PythonOperator(
 
 dag_daily = DAG(
     dag_id="daily_clients_pipeline",
-    default_args={**default_args, "start_date": start_date.add(hours=6)},
-    schedule="0 6 * * *",  # daily at 12:00 local time
+    default_args={**default_args, "start_date": start_date.add(hours=13)},
+    schedule="0 13 * * *",  # daily at 13:00 local time
     catchup=False,
     tags=["earthquake", "stocks"]
 )
