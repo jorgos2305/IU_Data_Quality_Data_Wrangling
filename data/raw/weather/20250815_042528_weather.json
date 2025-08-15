@@ -1,0 +1,367 @@
+[
+    {
+        "coord": {
+            "lon": 13.3889,
+            "lat": 52.517
+        },
+        "weather": [
+            {
+                "id": 800,
+                "main": "Clear",
+                "description": "clear sky",
+                "icon": "01n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 21.78,
+            "feels_like": 22,
+            "temp_min": 20.02,
+            "temp_max": 23.79,
+            "pressure": 1019,
+            "humidity": 76,
+            "sea_level": 1019,
+            "grnd_level": 1013
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 2.24,
+            "deg": 72,
+            "gust": 2.68
+        },
+        "clouds": {
+            "all": 0
+        },
+        "dt": 1755224603,
+        "sys": {
+            "type": 2,
+            "id": 2011538,
+            "country": "DE",
+            "sunrise": 1755229748,
+            "sunset": 1755282778
+        },
+        "timezone": 7200,
+        "id": 7576815,
+        "name": "Alt-K\u00f6lln",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": 11.5754,
+            "lat": 48.1371
+        },
+        "weather": [
+            {
+                "id": 802,
+                "main": "Clouds",
+                "description": "scattered clouds",
+                "icon": "03n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 17.43,
+            "feels_like": 17.53,
+            "temp_min": 16.36,
+            "temp_max": 18.47,
+            "pressure": 1020,
+            "humidity": 88,
+            "sea_level": 1020,
+            "grnd_level": 958
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 1.37,
+            "deg": 242,
+            "gust": 1.13
+        },
+        "clouds": {
+            "all": 45
+        },
+        "dt": 1755224450,
+        "sys": {
+            "type": 2,
+            "id": 2002112,
+            "country": "DE",
+            "sunrise": 1755230898,
+            "sunset": 1755282499
+        },
+        "timezone": 7200,
+        "id": 6940463,
+        "name": "Altstadt",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": 10.0007,
+            "lat": 53.5503
+        },
+        "weather": [
+            {
+                "id": 701,
+                "main": "Mist",
+                "description": "mist",
+                "icon": "50n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 20.93,
+            "feels_like": 21.66,
+            "temp_min": 20.88,
+            "temp_max": 22.38,
+            "pressure": 1018,
+            "humidity": 99,
+            "sea_level": 1018,
+            "grnd_level": 1017
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 2.06,
+            "deg": 320
+        },
+        "clouds": {
+            "all": 20
+        },
+        "dt": 1755224576,
+        "sys": {
+            "type": 1,
+            "id": 1263,
+            "country": "DE",
+            "sunrise": 1755230371,
+            "sunset": 1755283782
+        },
+        "timezone": 7200,
+        "id": 2911298,
+        "name": "Hamburg",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": 8.24,
+            "lat": 48.7611
+        },
+        "weather": [
+            {
+                "id": 801,
+                "main": "Clouds",
+                "description": "few clouds",
+                "icon": "02n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 21.42,
+            "feels_like": 21.81,
+            "temp_min": 20.5,
+            "temp_max": 23.23,
+            "pressure": 1018,
+            "humidity": 84,
+            "sea_level": 1018,
+            "grnd_level": 980
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 1.03,
+            "deg": 0
+        },
+        "clouds": {
+            "all": 13
+        },
+        "dt": 1755224730,
+        "sys": {
+            "type": 2,
+            "id": 2086962,
+            "country": "DE",
+            "sunrise": 1755231606,
+            "sunset": 1755283391
+        },
+        "timezone": 7200,
+        "id": 2953504,
+        "name": "Baden-Baden",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": 2.32,
+            "lat": 48.8589
+        },
+        "weather": [
+            {
+                "id": 800,
+                "main": "Clear",
+                "description": "clear sky",
+                "icon": "01n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 19.29,
+            "feels_like": 19.21,
+            "temp_min": 18.08,
+            "temp_max": 20.06,
+            "pressure": 1022,
+            "humidity": 74,
+            "sea_level": 1022,
+            "grnd_level": 1012
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 2.06,
+            "deg": 350
+        },
+        "clouds": {
+            "all": 0
+        },
+        "dt": 1755224710,
+        "sys": {
+            "type": 2,
+            "id": 2012208,
+            "country": "FR",
+            "sunrise": 1755233013,
+            "sunset": 1755284825
+        },
+        "timezone": 7200,
+        "id": 6545270,
+        "name": "Palais-Royal",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": -3.7036,
+            "lat": 40.4167
+        },
+        "weather": [
+            {
+                "id": 800,
+                "main": "Clear",
+                "description": "clear sky",
+                "icon": "01n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 27.76,
+            "feels_like": 27.17,
+            "temp_min": 24.8,
+            "temp_max": 29.24,
+            "pressure": 1019,
+            "humidity": 35,
+            "sea_level": 1019,
+            "grnd_level": 945
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 3.09,
+            "deg": 70
+        },
+        "clouds": {
+            "all": 0
+        },
+        "dt": 1755224730,
+        "sys": {
+            "type": 2,
+            "id": 2084029,
+            "country": "ES",
+            "sunrise": 1755235548,
+            "sunset": 1755285182
+        },
+        "timezone": 7200,
+        "id": 6544494,
+        "name": "Madrid City Center",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": -99.1332,
+            "lat": 19.4326
+        },
+        "weather": [
+            {
+                "id": 500,
+                "main": "Rain",
+                "description": "light rain",
+                "icon": "10n"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 17.72,
+            "feels_like": 17.3,
+            "temp_min": 17.72,
+            "temp_max": 17.94,
+            "pressure": 1021,
+            "humidity": 67,
+            "sea_level": 1021,
+            "grnd_level": 765
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 5.14,
+            "deg": 340
+        },
+        "rain": {
+            "1h": 0.68
+        },
+        "clouds": {
+            "all": 100
+        },
+        "dt": 1755224685,
+        "sys": {
+            "type": 2,
+            "id": 47729,
+            "country": "MX",
+            "sunrise": 1755173826,
+            "sunset": 1755219926
+        },
+        "timezone": -21600,
+        "id": 3530597,
+        "name": "Mexico City",
+        "cod": 200
+    },
+    {
+        "coord": {
+            "lon": 139.7639,
+            "lat": 35.6769
+        },
+        "weather": [
+            {
+                "id": 801,
+                "main": "Clouds",
+                "description": "few clouds",
+                "icon": "02d"
+            }
+        ],
+        "base": "stations",
+        "main": {
+            "temp": 32.62,
+            "feels_like": 38.9,
+            "temp_min": 30.48,
+            "temp_max": 34.3,
+            "pressure": 1014,
+            "humidity": 61,
+            "sea_level": 1014,
+            "grnd_level": 1012
+        },
+        "visibility": 10000,
+        "wind": {
+            "speed": 7.2,
+            "deg": 180
+        },
+        "clouds": {
+            "all": 20
+        },
+        "dt": 1755224730,
+        "sys": {
+            "type": 2,
+            "id": 268395,
+            "country": "JP",
+            "sunrise": 1755201583,
+            "sunset": 1755250291
+        },
+        "timezone": 32400,
+        "id": 1857654,
+        "name": "Marunouchi",
+        "cod": 200
+    }
+]
